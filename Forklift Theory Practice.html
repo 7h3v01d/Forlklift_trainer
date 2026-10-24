@@ -1,0 +1,690 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Forklift Theory Practice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one narrow column under a hazard-stripe header; one question card at a time; results styled like a forklift data plate. */
+:root{
+  --bg:#E9ECE9; --surface:#FFFFFF; --soft:#F2F4F2; --ink:#1A1F1C; --muted:#56605A; --line:#CBD1CC;
+  --accent:#FFC400; --on-accent:#1A1F1C; --stripe:#1A1F1C; --focus:#1A1F1C;
+  --good:#1D7A4C; --good-bg:#E0F1E7; --bad:#B3302A; --bad-bg:#FBE5E2;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --f-body:'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101311; --surface:#1A1E1B; --soft:#222723; --ink:#EDF0ED; --muted:#9BA49E; --line:#343B37;
+    --focus:#FFC400; --good:#5CCB92; --good-bg:#16301F; --bad:#FF8F82; --bad-bg:#3A1D1A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101311; --surface:#1A1E1B; --soft:#222723; --ink:#EDF0ED; --muted:#9BA49E; --line:#343B37;
+  --focus:#FFC400; --good:#5CCB92; --good-bg:#16301F; --bad:#FF8F82; --bad-bg:#3A1D1A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.5;
+  padding-block:0 48px; padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.stripe{height:10px;background:repeating-linear-gradient(-45deg,var(--accent) 0 12px,var(--stripe) 12px 24px);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px))) calc(-1 * max(16px,env(safe-area-inset-right,0px)))}
+.wrap{max-width:720px;margin:0 auto}
+header{padding:28px 0 20px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(34px,8vw,52px);letter-spacing:.005em;margin-top:6px}
+h2{font-size:28px}
+h3{font-size:20px}
+p{margin:0}
+.lede{color:var(--muted);margin-top:10px;max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.stack{display:flex;flex-direction:column;gap:20px}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:10px}
+.topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--soft);cursor:pointer;min-width:0}
+.chk input{width:18px;height:18px;accent-color:var(--ink);flex:none}
+.chk span{min-width:0}
+.chk small{color:var(--muted);font-family:var(--f-mono);font-size:12px;margin-left:4px}
+.lens{display:flex;flex-wrap:wrap;gap:8px}
+.seg{min-height:44px;padding:8px 18px;border:1px solid var(--line);border-radius:8px;background:var(--soft);color:var(--ink);font:600 16px var(--f-body);cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{min-height:46px;padding:10px 22px;border-radius:8px;border:2px solid var(--ink);background:var(--accent);color:var(--on-accent);font:700 17px var(--f-display);letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,.chk:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+.hint{color:var(--muted);font-size:14px}
+/* quiz */
+.meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--accent);border-right:2px solid var(--stripe);width:0}
+.qtext{font-family:var(--f-display);font-weight:600;font-size:clamp(22px,5.4vw,28px);line-height:1.2;text-wrap:balance;outline:none}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;min-height:48px;padding:12px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:500 16px/1.4 var(--f-body);cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--ink)}
+.opt .ltr{flex:none;width:26px;height:26px;border-radius:5px;background:var(--soft);border:1px solid var(--line);display:grid;place-items:center;font:600 13px var(--f-mono)}
+.opt span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt.sel{border-color:var(--ink);background:var(--soft);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.ok .ltr{background:var(--good);color:var(--surface);border-color:var(--good)}
+.opt.no{border-color:var(--bad);background:var(--bad-bg)}
+.opt.no .ltr{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.numrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.numrow input{width:160px;max-width:100%;min-height:48px;padding:8px 12px;border:1.5px solid var(--ink);border-radius:8px;background:var(--surface);color:var(--ink);font:600 20px var(--f-mono)}
+.numrow input[disabled]{opacity:.8}
+.unit{font-family:var(--f-mono);color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.fb{margin-top:18px;padding:14px 16px;border-radius:8px;border:1.5px solid var(--line);background:var(--soft)}
+.fb.ok{border-color:var(--good);background:var(--good-bg)}
+.fb.no{border-color:var(--bad);background:var(--bad-bg)}
+.fb strong{font-family:var(--f-display);font-size:20px;letter-spacing:.02em;text-transform:uppercase}
+.fb p{margin-top:4px}
+.ref{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:8px}
+.nextrow{margin-top:18px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+/* results plate */
+.plate{position:relative;border:3px solid var(--ink);border-radius:8px;background:var(--surface);padding:26px 24px 22px}
+.bolt{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:var(--soft)}
+.bolt.a{top:8px;left:8px}.bolt.b{top:8px;right:8px}.bolt.c{bottom:8px;left:8px}.bolt.d{bottom:8px;right:8px}
+.plate .cap{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.score{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin:6px 0 4px}
+.score b{font-family:var(--f-mono);font-weight:600;font-size:clamp(44px,12vw,72px);line-height:1;font-variant-numeric:tabular-nums}
+.score span{font-family:var(--f-mono);font-size:22px;font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:15px}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:middle}
+.tbl th{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tbl td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mini{height:8px;border-radius:4px;background:var(--line);overflow:hidden;min-width:70px}
+.mini i{display:block;height:100%;background:var(--good)}
+.mini i.lo{background:var(--bad)}
+.tblwrap{overflow-x:auto}
+.miss{border-top:1px solid var(--line);padding:16px 0}
+.miss:first-of-type{border-top:0}
+.miss h3{font-size:19px;font-weight:600;font-family:var(--f-body);line-height:1.35}
+.miss .a{margin-top:8px;font-size:15px}
+.miss .a b{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-right:6px}
+.bad{color:var(--bad)} .goodc{color:var(--good)}
+.qhint{margin-top:14px}
+.opt.used{opacity:.4}
+.seq{margin:14px 0 0;padding:0;list-style:none;counter-reset:st;display:flex;flex-direction:column;gap:8px}
+.seq:empty{display:none}
+.seq li{counter-increment:st;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--ink);border-radius:8px;background:var(--soft);min-width:0}
+.seq li::before{content:counter(st);flex:none;width:24px;height:24px;border-radius:5px;background:var(--ink);color:var(--surface);display:grid;place-items:center;font:600 13px var(--f-mono)}
+.seq li span{min-width:0;overflow-wrap:anywhere}
+.seq li.ok{border-color:var(--good);background:var(--good-bg)}
+.seq li.no{border-color:var(--bad);background:var(--bad-bg)}
+.verdict{display:inline-block;margin:6px 0 0;padding:6px 10px;border-radius:6px;font:600 13px var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.verdict.pass{background:var(--good-bg);color:var(--good)}
+.verdict.fail{background:var(--bad-bg);color:var(--bad)}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .25s ease}}
+</style>
+
+<div class="stripe" aria-hidden="true"></div>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">TLILIC0003 · Class LF · Queensland</div>
+    <h1>Forklift Theory Practice</h1>
+    <p class="lede">Questions are taken from your Just Careers study guide (version 2.1). Queensland power line distances are the guide's guidance figures, so confirm them with your assessor.</p>
+  </header>
+  <main id="app" class="stack" aria-live="off"></main>
+</div>
+
+<script>
+(function(){
+"use strict";
+var TOPICS={
+  law:"Legislation and duty of care", haz:"Hazards and power lines", site:"Pedestrians and site controls",
+  comm:"Weather and communications", type:"Forklift types, fuel and batteries", pre:"Pre-start and operational checks",
+  ops:"Safe operation and stability", att:"Attachments", plate:"Data plates and load centres", calc:"Load calculations",
+  park:"Shut down and parking", oth:"Other states (reference only)"
+};
+var D=[];
+function M(t,p,q,o,e){D.push({t:t,p:p,q:q,o:o,e:e});}
+function N(t,p,q,a,u,e){D.push({t:t,p:p,q:q,a:a,u:u,e:e});}
+function MS(t,p,q,o,k,e){D.push({t:t,p:p,q:q,s:o,k:k,e:e});}
+function OR(t,p,q,steps,e){D.push({t:t,p:p,q:q,ord:steps,e:e});}
+
+/* Legislation */
+M("law",2,"Which statement best defines a hazard?",["Something that may cause harm or injury","What could happen to you when exposed to something dangerous","A written safe work procedure","An injury that has already happened"],"A hazard is something that may cause harm or injury. A wet floor is the hazard; slipping over is the risk.");
+M("law",2,"Which statement best defines a risk?",["What could happen to you when exposed to a hazard","Something that may cause harm or injury","A control measure such as a barrier","A fault found on a forklift"],"Risk is what could happen to you when you are exposed to a hazard.");
+M("law",2,"As a worker in a forklift environment, your legal duty of care means you must",["Take care of your own safety and the safety of others","Take care of your own safety only","Report hazards and leave the controls to management","Follow the supervisor even when the task is unsafe"],"Duty of care covers your own safety and other people's safety.");
+M("law",2,"If you work unsafely while holding a HRWL, the safety regulator could",["Suspend or cancel your licence, or refuse to renew it","Only give you a verbal warning","Automatically lower your licence class","Transfer your licence to your employer"],"The regulator can suspend, cancel or refuse to renew a high risk work licence.");
+M("law",3,"The forklift your employer gave you is unfamiliar. What must the employer provide?",["Training, supervision, information and instructions","Nothing, your licence covers every forklift","A different licence class","Only a copy of the operator's manual"],"Employers must provide training, supervision, information and instructions, as well as a safe workplace, equipment, systems and facilities.");
+M("law",2,"Which of these is a source of safety information for forklift work?",["Safe work procedures (SWPs) and the operator's manual","The weekly staff roster","A supplier's price list","The colour of a pallet"],"Sources include the operator's manual, safety policies, Australian standards, SWPs, JSAs, SDSs, SWL charts and codes of practice.");
+M("law",3,"Before starting work, who should you talk to about known hazards?",["Supervisors, co-workers, managers, first aid officers, fire wardens and truck drivers","Your supervisor only","Only other forklift operators","Nobody if the hazards are obvious"],"Everyone who works in the area needs to be aware of hazards, and to identify the hazards and controls.");
+
+/* Hazards and power lines */
+M("haz",4,"Black and yellow stripes wrapped around a power line are called",["Tiger tails","Marker balls","Danger tapes","Hazard sleeves"],"Tiger tails make power lines easier to see in sun glare.");
+M("haz",4,"Bright orange balls placed evenly along a power line are called",["Power line marker balls","Tiger tails","Insulation weights","Voltage indicators"],"Marker balls are another visual indicator for power lines.");
+M("haz",6,"You are unsure of the voltage of nearby power lines. The best way to find out is to",["Call the local power company","Ask a co-worker to guess","Assume it is under 1000 V","Check the forklift data plate"],"Call the local power company.");
+M("haz",5,"Queensland guidance: minimum distance from power lines up to and including 132 kV?",["3.0 m","1.0 m","6.4 m","8.0 m"],"Up to and including 132 kV is 3.0 m. Clarify with the electrical authority before work starts.");
+M("haz",5,"Queensland guidance: minimum distance from lines above 132 kV up to and including 330 kV?",["6.0 m","3.0 m","8.0 m","10 m"],"Above 132 kV up to 330 kV is 6.0 m.");
+M("haz",5,"Queensland guidance: minimum distance from lines above 330 kV?",["8.0 m","6.0 m","3.0 m","10 m"],"Above 330 kV is 8.0 m.");
+M("haz",6,"You contact an overhead power line while operating. What is the FIRST step?",["Warn people to stay away","Report to a supervisor","Jump out of the forklift","Check the forklift for damage"],"The five steps in order: warn people, try to break away, stay in the forklift if safe (otherwise exit and jump or shuffle 8 m away), report to a supervisor, check the forklift before reuse.");
+M("haz",6,"In the power line contact procedure, what is the LAST step?",["Check the forklift before reuse","Warn people to stay away","Report to a supervisor","Try to break away from the lines"],"Order: warn, break away, stay in or exit safely, report, check the forklift before reuse.");
+M("haz",6,"After contacting power lines, if you must leave the forklift you should",["Jump or shuffle 8 m away with your feet together","Step down and walk away quickly","Climb down holding the frame","Jump clear and run"],"Keep your feet together and jump or shuffle 8 m away.");
+M("haz",33,"Which surface should be avoided at all times by any forklift?",["Trench covers or grates","Hard flat bitumen","Flat concrete","A level sealed warehouse floor"],"Avoid backfilled ground, cracked concrete, trench covers or grates, soft soils, railway tracks, potholes, rough surfaces, hard compacted soil, cracked bitumen and slopes.");
+M("haz",33,"Why are high reach trucks not suitable on sloping surfaces?",["They are top heavy","They are too slow","They have no brakes","Their forks are too short"],"High reach trucks are top heavy.");
+M("haz",10,"Planning forklift tasks around the weather forecast helps you to",["Schedule the work and plan risk controls","Skip the pre-start","Carry heavier loads","Avoid wearing a seat belt"],"The forecast helps to schedule work tasks and plan risk controls.");
+M("haz",8,"On wet or slippery surfaces you should",["Slow down, brake slowly, turn slowly and avoid ramps or slopes","Speed up to cross quickly","Brake hard to test the grip","Use ramps to get better traction"],"Slow down, brake slowly, turn slowly and avoid ramps and slopes.");
+M("haz",7,"When operating at night or in dark areas you must always have",["Adequate lighting","A spare key","Wet weather tyres","A second forklift"],"Adequate lighting is required in dark areas.");
+M("haz",11,"A co-worker gives you an unclear signal. You should",["Stop the forklift and ask them to repeat the signal","Guess and keep going","Sound the horn and continue","Reverse away"],"Stop the forklift and ask for the signal to be repeated.");
+
+/* Site controls */
+M("site",7,"Which of these are control measures that keep pedestrians safe from the forklift area?",["Warning signs, barriers, walkways, flashing lights and traffic mirrors","Loud music in the workshop","Parking forklifts in walkways","Removing the reverse beeper"],"Common controls are warning signs, barriers, walkways, flashing lights and traffic mirrors.");
+M("site",33,"Who is most at risk in the forklift operating area?",["Pedestrians","The operator","Truck drivers only","Supervisors"],"Pedestrians are most at risk, so they are separated from the operating area.");
+M("site",33,"Overhead walkways are used to",["Suspend people above the dangerous forklift operating area","Store pallets","Mark parking spots","Hold lighting"],"They keep people above the forklift operating area.");
+M("site",33,"Designated walkways are usually marked with",["Bright yellow stripes and a foot symbol at intervals","Red dots","Blue arrows with no symbols","Black and white checks"],"Bright yellow stripes with a foot symbol show a pedestrian walking area only.");
+M("site",34,"Pedestrian crossings in a forklift area are usually",["Bright yellow stripes painted like zebra crossings","Red stripes","Raised steel plates","Blue lines"],"Bright yellow zebra-style stripes.");
+M("site",34,"The gates in a pedestrian guardrail have spring hinges so they",["Close automatically behind the passing pedestrian","Lock when a forklift approaches","Open for forklifts","Stay open at all times"],"Spring hinges close the gate automatically behind the pedestrian.");
+M("site",35,"Flashing lights on the back of loading docks indicate",["A truck is now safe to unload or load","The forklift battery is low","Pedestrians are on the dock","The dock is closed for the day"],"They show the forklift driver the truck is safe to load or unload.");
+M("site",35,"A speed limit sign such as '5' is coloured",["White, red and black","Yellow and black","Green and white","Blue and white"],"Speed limit signs are white, red and black.");
+M("site",34,"High impact barriers are made from",["Strong galvanised steel","Soft plastic","Painted timber","Rope and posts"],"They are strong galvanised steel barriers able to withstand a larger impact.");
+
+/* Types, fuel, batteries */
+M("type",9,"Which forklift is most suitable in a confined area with limited air flow?",["An electric forklift","A diesel forklift","An LPG forklift","A petrol forklift"],"Electric forklifts suit indoor, confined spaces.");
+M("type",8,"Why are internal combustion forklifts (LPG, diesel, petrol) not suitable where air flow is restricted?",["Fumes can kill you","They are too quiet","They cannot lift loads","They need larger pallets"],"Exhaust fumes can kill. Use them outdoors.");
+M("type",9,"Which forklift is the only suitable one when the ground is rough and boggy?",["An all terrain forklift","An electric forklift","A high reach truck","An indoor counterbalance forklift"],"All terrain forklifts are for rough and boggy ground.");
+M("type",9,"Why can all terrain forklifts tip over easily?",["They have a higher centre of gravity","They have no brakes","They are very light","They have no overhead guard"],"A higher centre of gravity makes them easier to tip.");
+M("type",9,"Most forklifts steer with the rear wheels. The risk this creates is",["Rear end swing","Loss of hydraulic pressure","Overheating","Brake fade"],"Rear steering gives tight turns but causes rear end swing.");
+M("type",9,"During a turn, the rear end of a forklift can swing at about",["Three times the speed of the forklift","The same speed as the forklift","Half the speed of the forklift","Ten times the speed of the forklift"],"About three times the speed of the forklift. Keep the front wheel close to where you are turning.");
+M("type",9,"Why is rear end swing dangerous?",["It could hit nearby people or objects","It lowers the forks","It drains the battery","It stalls the engine"],"The swinging rear end could hit people or objects.");
+M("type",10,"Why must a forklift battery on charge be kept in a ventilated area?",["To release flammable (explosive) gas and prevent explosions","To keep the operator cool","To stop the horn sounding","To speed up charging"],"Charging gives off an extremely explosive flammable gas, so ventilation lets it escape.");
+M("type",11,"A fuel powered forklift needs refuelling. You should",["Turn the engine off first","Keep the engine idling","Refuel with a load on the forks","Refuel only at night"],"A running engine could ignite the fuel, vapours or gases.");
+
+/* Pre-start and operational checks */
+M("pre",13,"Pre-start checks are done",["Before you turn the forklift on","After the first load","After you turn the ignition on","At the end of the shift"],"Pre-starts are done BEFORE you turn on the forklift.");
+M("pre",13,"Which of these is checked with the ignition OFF during the pre-start?",["Hydraulic hoses","Horn","Reverse beeper","Gauges"],"Hoses are a pre-start item. Horn, gauges and the reverse beeper are operational checks.");
+M("pre",15,"Which of these is an operational check done with the ignition ON?",["Brakes","Fork locking pins","Chains","Data plate"],"Operational checks: steering, brakes, horn, lights, hydraulic levers, gauges, reverse beeper.");
+M("pre",15,"Which list is the full set of operational checks after turning the ignition on?",["Steering, brakes, horn, lights, hydraulic levers, gauges, reverse beeper","Tyres, forks, mast, battery, chains, pulleys, seat","Log book, data plate, fluid levels, LPG cylinder","Seat belt, mirrors, carriage, guards, attachments"],"The other lists are pre-start items checked before starting.");
+M("pre",13,"Which of these is a tyre defect to look for?",["Large pieces of rubber missing","Even tread across the tyre","Matching pressure on all tyres","Secure wheel nuts"],"Defects: missing rubber, flat, unsecure wheels, underinflated, uneven tread, worn down.");
+M("pre",15,"Why should all air filled tyres be at the same pressure?",["To keep the forklift and load stable","To save fuel","To reduce noise","To make tyres last longer"],"Uneven pressure affects the stability of the forklift and load.");
+M("pre",13,"You are unsure how to secure an attachment. Where do you look?",["The manufacturer's or operator's manual for the attachment","Ask a passing pedestrian","Guess from the last attachment you used","The forklift's horn"],"Use the attachment's manual and the manufacturer's instructions.");
+M("pre",14,"You find a fault in the pre-start, such as an unreadable data plate. You should",["Remove the key, tag it out of service and report to a supervisor","Use it carefully and mention it later","Fix it yourself and carry on","Swap the data plate with another forklift's"],"Remove the key, tag out of service, report to a supervisor.");
+M("pre",15,"The overhead guard protects",["The operator's head from falling objects","The mast and operator from the load","The battery from rain","The forks from damage"],"Overhead guard: operator's head from falling objects.");
+M("pre",15,"The load guard protects",["The mast and operator from the load","The operator's head from falling objects","The tyres from the load","Pedestrians from rear end swing"],"Load guard: the mast and operator from the load.");
+M("pre",22,"The function of the seat belt is",["To stop you falling out in an accident","To keep the seat clean","To speed up pre-starts","To hold the load"],"It stops you falling out in an accident.");
+M("pre",23,"You have a major failure of the brakes, steering or hydraulics while operating. What do you do?",["Stop the forklift, tag it out of service and report to a supervisor","Finish the load then report it","Drive slowly to the workshop","Use the hand brake to finish the shift"],"Two things: stop and tag out of service, then report to a supervisor.");
+
+/* Safe operation and stability */
+M("ops",11,"Which of these should you consider, other than hazards, before shifting a load?",["Load weight, safest route, forklift type and capacity","The colour of the pallet","The brand of the forklift tyres","The operator's shift length"],"Also location of the load, attachment, communications, permits and equipment for the task.");
+M("ops",16,"Which methods can be used to work out the weight of a load?",["Weighbridge documents, labels, the inventory system, calculating or weighing it","Judging it by eye","Asking a passer-by","Lifting it to see if the forklift strains"],"Never guess the weight.");
+M("ops",16,"Your view is blocked by a tall load. You should",["Travel in reverse, use a spotter, or repack the load if it is safe","Raise the load higher to see underneath","Drive forward faster","Lean out of the cab"],"Travel in reverse, use a spotter, or repack the load if safe to do so.");
+M("ops",16,"While travelling with a load, its movement needs to be monitored to",["Keep the forklift and load stable","Save fuel","Warm the hydraulics","Keep the horn working"],"Monitoring keeps the forklift AND load stable.");
+M("ops",16,"When may you carry a passenger on a forklift?",["Only when it is designed to carry one","When the passenger holds the overhead guard","For short distances only","When the passenger is a supervisor"],"Only on rare two-seater forklifts designed to carry people.");
+M("ops",17,"Travelling with the load raised too high creates a high risk that",["The forklift could tip over","The brakes will fail","The battery will overheat","The horn will stop working"],"A raised load raises the centre of gravity.");
+M("ops",17,"Raising or lowering a load over people creates",["A risk of injury or death if the load falls","No risk if you go slowly","A risk only if the load is heavy","A risk only outdoors"],"Never raise or lower a load over people.");
+M("ops",17,"A safe travelling height for the load is",["At axle height or as low as possible","Shoulder height","Just below the overhead guard","With the mast fully extended"],"Keep the load at axle height or as low as possible.");
+M("ops",17,"Going up or down a ramp with a load, the load must face",["Up the ramp","Down the ramp","Sideways across the ramp","Either direction"],"The load must face up the ramp.");
+M("ops",18,"Why is it unsafe to turn a loaded forklift on a ramp?",["You could lose the load or tip the forklift","The steering locks","The brakes engage","The horn stops"],"Face the ramp squarely and do not turn on it.");
+M("ops",18,"Carrying a load on only one fork arm risks",["Tipping the load, tipping the forklift and damaging the forklift","Faster travel","Better visibility","Lower fuel use"],"Never carry a load on one fork arm.");
+M("ops",18,"Which action could tip a forklift over SIDEWAYS?",["Turning on a ramp","Braking gently on level ground","Travelling straight with the load low","Having equal tyre pressures"],"Sideways tip: turning too fast, turning on ramps, turning with a load raised, uneven surfaces, uneven load, one fork, uneven tyres, side shift not centred.");
+M("ops",19,"Which action could tip a forklift over FORWARDS?",["Braking severely","Turning slowly with the load low","Keeping the load against the heels","Travelling straight at low speed"],"Forwards tip: overloaded, severe braking, load too high, too fast, forwards down a hill, uneven surface, unbalanced load, too much forward tilt, load too far forward on the forks.");
+M("ops",20,"Why must you centralise the side shift when carrying a load?",["To keep the forklift and load stable","To save hydraulic fluid","To make the load lighter","To lock the forks"],"An off-centre side shift reduces stability.");
+M("ops",21,"When stacking loads, the heaviest goods go",["On the bottom","On the top","In the middle","Wherever they fit"],"Heaviest goods on the bottom.");
+M("ops",21,"Which three things do you plan for when stacking loads?",["A flat level surface, heaviest goods on the bottom, a stable stack","A slope, heaviest on top, a tall stack","A wet floor, mixed weights, a quick stack","A ramp, lightest on the bottom, a swinging stack"],"1) flat level surface, 2) heaviest on the bottom, 3) keep the stack stable.");
+M("ops","Study guide pages 21–22","Your forklift starts to tip sideways. What must you do?",["Stay in the forklift, brace yourself and lean away from the tipping side","Jump out away from the forklift","Jump out on the opposite side","Let go of the steering wheel"],"Never jump out. You could be crushed by the forklift.");
+M("ops",22,"In a sideways tip-over, which action protects you besides staying in the forklift?",["Brace yourself and lean away from the tipping side","Reach out to catch the load and lean towards the tip","Release your seat belt and duck down","Hold the load with the hydraulic lever and look away"],"Stay in the forklift (never jump out), brace yourself and lean away from the tipping side.");
+M("ops",21,"Why must you never jump out of a forklift that is tipping sideways?",["You could be crushed by the forklift","The seat belt will not release","The brakes will lock on","The overhead guard will fall off"],"Staying in protects you from being crushed by the forklift.");
+M("ops",22,"A counterbalance forklift's fulcrum (balance point) is",["Under the front tyres touching the ground","Under the seat","At the top of the mast","At the rear counterweight"],"The fulcrum is the triangle under the front tyres.");
+M("ops",22,"A jib attachment creates which extra hazards?",["A lower capacity and a swinging load","A higher capacity","A narrower forklift","Less rear end swing"],"A jib acts like a crane, so the load can swing and capacity drops.");
+M("ops",23,"Before moving a load across the gap between a truck and a loading dock, you must place",["Dock plates or bridge plates","Pallets","Traffic cones only","Nothing, if you go slowly"],"Dock plates or bridge plates across the gap.");
+
+/* Attachments */
+M("att",19,"A drum clamp is used to pick up",["200 L drums","Bins of grapes","Rolls of carpet","People"],"Drum clamp: 200 L drums.");
+M("att",19,"Fork extensions (slippers) are used to pick up",["Two loads at once or a longer load","Crushed cans","Engine blocks","200 L drums"],"Fork extensions handle two loads or a longer load.");
+M("att",19,"A paper roll clamp is used to clamp",["Large rolls of paper or tyres","Hay bales","200 L drums","Engine blocks"],"Paper roll clamp: large rolls of paper or tyres.");
+M("att",19,"A bale clamp is used to pick up",["Crushed stacks of recycled cans or bales of hay","200 L drums","Rolls of carpet","People"],"Bale clamp: crushed cans or hay bales.");
+M("att",20,"Which attachment swings odd shaped loads such as engine blocks or gearboxes?",["A jib","A bale clamp","A carpet spike","A paper roll clamp"],"Jib.");
+M("att",20,"Carpet spikes are used to pick up",["Large rolls of carpet or artificial turf","200 L drums","Hay bales","Stacks of tyres"],"Carpet spikes: carpet or artificial turf.");
+M("att",20,"Personnel work platforms are used to",["Elevate people for maintenance or stock counts","Carry pallets","Rotate drums","Stack tyres"],"They elevate people to perform maintenance or count stock.");
+M("att",20,"Rotators are used to",["Rotate loads, such as a bin of grapes into a wine hopper","Pick up two loads at once","Lift carpet","Clamp paper rolls"],"Rotators rotate the load.");
+M("att",20,"When an attachment is fitted, the forklift's lifting capacity is",["Reduced","Increased","Unchanged","Doubled"],"Capacity is reduced, so read the attachment's manual.");
+M("att",14,"A long carpet spike greatly lowers capacity because of",["A greater load centre distance","A lower mast","Smaller tyres","A heavier battery"],"The longer the attachment, the greater the load centre distance.");
+
+/* Data plates and load centres */
+M("plate",24,"Where do you find the forklift's rated capacity?",["On the data plate","On the hour meter","On the log book cover","On the seat belt label"],"The data plate shows rated capacity.");
+M("plate",25,"Load centre distance is measured from",["The vertical face (heel) of the forks to the load's centre of gravity","The mast to the front tyre","The ground to the top of the load","The back of the seat to the forks"],"Heel of the forks to the load's centre of gravity.");
+M("plate",26,"Most forklifts in Australia are rated at a load centre distance of",["600 mm","500 mm","1200 mm","1000 mm"],"600 mm.");
+M("plate",26,"The 600 mm load centre rating comes from",["Half the width of a standard 1200 mm pallet","The length of a fork","The mast height","The tyre diameter"],"Half of a 1200 mm x 1200 mm pallet.");
+M("plate",26,"A load that is NOT against the heel of the forks means the forklift could have",["A lower capacity, or tip over","A higher capacity","A wider turning circle","Better balance"],"Keep the load against the heels.");
+M("plate",23,"On a data plate, Dim B and Dim C are",["The horizontal and vertical load centres","Battery and charger sizes","Front and rear tyre pressures","Fork length and width"],"Dim B is the horizontal load centre, Dim C the vertical load centre.");
+M("plate",31,"To work out whether a forklift can lift a load, you must look at",["The load weight (kg) and the load centres (mm)","The load colour and weight","The pallet age and weight","The fork length and tyre pressure"],"Both weight and load centres must be within the rating.");
+N("plate",30,"Sample data plate: 1070 mm forks and side shift, mast vertical, 4200 mm fork height at a 600 mm load centre. What is the rated capacity?",2500,"kg","The vertical row reads 4200 / 600 / 2500 kg.");
+N("plate",30,"Same plate: carpet spike, mast vertical, 4200 mm fork height at a 1800 mm load centre. What is the rated capacity?",1000,"kg","The carpet spike row reads 4200 / 1800 / 1000 kg.");
+N("plate",30,"Same plate: 1070 mm forks and side shift, mast tilted forward 5 degrees, 600 mm load centre. What is the rated capacity?",2050,"kg","Forward tilt gives 2050 kg compared with 2500 kg vertical.");
+
+/* Calculations */
+N("calc",27,"A pallet of cement: 5 bags per layer, 8 layers, 25 kg per bag, pallet 30 kg. What is the total weight?",1030,"kg","5 x 8 = 40 bags. 40 x 25 = 1000 kg. 1000 + 30 = 1030 kg.");
+N("calc",28,"A pallet of drums: 6 drums at 150 kg each on a 35 kg pallet. What is the total weight?",935,"kg","6 x 150 = 900 kg. 900 + 35 = 935 kg.");
+N("calc","Practice question using the method on page 27","A pallet of bags: 4 bags per layer, 10 layers, 20 kg per bag, pallet 25 kg. What is the total weight?",825,"kg","4 x 10 = 40 bags. 40 x 20 = 800 kg. 800 + 25 = 825 kg.");
+N("calc","Practice question using the method on page 28","A pallet of drums: 8 drums at 120 kg each on a 40 kg pallet. What is the total weight?",1000,"kg","8 x 120 = 960 kg. 960 + 40 = 1000 kg.");
+N("calc",32,"A shipping container has a tare weight of 5000 kg and 7000 kg of contents. What is the total weight?",12000,"kg","5000 + 7000 = 12000 kg.");
+N("calc",28,"A load is 1400 mm long. What is its load centre distance?",700,"mm","1400 ÷ 2 = 700 mm.");
+N("calc",28,"A load is 1000 mm long. What is its load centre distance?",500,"mm","1000 ÷ 2 = 500 mm.");
+N("calc",32,"A pallet is 1180 mm x 1180 mm. What is the horizontal load centre (Dim B)?",590,"mm","1180 ÷ 2 = 590 mm.");
+N("calc",24,"A load is 1500 mm high. What is the vertical load centre (Dim C)?",750,"mm","1500 ÷ 2 = 750 mm.");
+M("calc",32,"Forklift plate: 9000 kg, Dim B 1200 mm, Dim C 1200 mm. Load: 2500 kg, pallet 1180 x 1180 mm, 1400 mm high. Can it lift the load?",["Yes: weight and both load centres are within the rating","No: the weight is too high","No: Dim B is too high","No: Dim C is too high"],"Weight 2500 kg is under 9000 kg. Dim B is 590 mm and Dim C is 700 mm, both under 1200 mm.");
+M("calc",32,"Same forklift (9000 kg, 1200 mm / 1200 mm). Loaded container: 12000 kg, 2.5 m wide, 2.6 m high. Can it lift the load?",["No: over the capacity and over both load centres","Yes: it is within the rating","Yes: only the weight matters","No: only the height is over"],"12000 kg is over 9000 kg. Dim B is 1250 mm and Dim C is 1300 mm, both over 1200 mm.");
+M("calc","Practice question using the method on page 32","Same forklift (9000 kg, 1200 mm / 1200 mm). Load: 8500 kg, 2.2 m wide, 1.8 m high. Can it lift the load?",["Yes: weight and both load centres are within the rating","No: the weight is over","No: Dim B is over","No: Dim C is over"],"8500 kg is under 9000 kg. Dim B is 1100 mm and Dim C is 900 mm.");
+M("calc","Practice question using the method on page 32","Same forklift (9000 kg, 1200 mm / 1200 mm). Load: 3000 kg, 2.6 m long, 1.0 m high. Can it lift the load?",["No: the horizontal load centre (1300 mm) is over 1200 mm","Yes: the weight is under 9000 kg so it passes","No: the weight is too high","Yes: the vertical load centre is fine so it passes"],"Weight is fine, but 2600 ÷ 2 = 1300 mm is over Dim B 1200 mm. Both checks must pass.");
+M("calc","Study guide pages 28–29","A forklift is rated 4200 kg at a 600 mm load centre. Loads A (1400 mm), B (1000 mm) and C (1300 mm) all weigh 4200 kg. Which is within specification?",["Load B only (500 mm)","Load A only (700 mm)","Load C only (650 mm)","All three"],"Only B has a load centre of 600 mm or less.");
+
+/* Shut down and parking */
+M("park",26,"Which of these is a place a forklift should NOT be parked?",["Near a first aid station, emergency exit or fire extinguisher","In a designated parking bay","In a marked forklift bay","Beside the charging bay"],"Do not park near first aid stations, emergency exits or fire extinguishers, or on ramps or walkways.");
+M("park",26,"Which of these is a place a forklift should NOT be parked?",["On a ramp or walkway","In a designated parking bay","In a marked forklift bay","In the allocated charging area"],"Not on ramps or walkways.");
+M("park",27,"When parking, the forks should be",["Tilted forward and lowered to the ground","Raised to axle height","Left raised for the next operator","Tilted back"],"Tilt forks forward and lower to the ground.");
+M("park",27,"Which is the correct set of parking steps?",["Forks down, hand brake on, neutral, remove key, LPG off, battery on charge","Forks up, engine running, key left in","Hand brake off, drive gear, key left in","Forks tilted back, LPG on, battery off charge"],"Tilt forks forward and lower, hand brake on, neutral, remove keys, turn off the LPG cylinder, place the battery on charge.");
+M("park",27,"At the end of the day you remove the key to",["Prevent unauthorised use","Save fuel","Lock the forks","Reset the gauges"],"Removing the key prevents unauthorised use.");
+
+
+/* ===== Expansion: select-all and ordering questions, plus more coverage ===== */
+
+/* Legislation (p2-3) */
+MS("law",2,"Which of these are sources of safety information? Select all that apply.",["Operator's manual","Job Safety Analysis (JSA)","Safety Data Sheets (SDS)","Safe work load charts (SWL charts)","Codes of practice","The forklift's tyre brand"],[0,1,2,3,4],"Sources include the operator's manual, safety policies, Australian standards, SWPs, JSAs, SDSs, SWL charts and codes of practice.");
+MS("law",3,"Which of these must your employer PROVIDE? Select all that apply.",["A safe workplace","Safe working equipment","Safe working systems","Safe facilities","Your own transport to work","A free lunch"],[0,1,2,3],"The guide lists four: a safe workplace, safe working equipment, safe working systems and safe facilities.");
+MS("law",3,"You are unfamiliar with the forklift your employer gave you. What must they provide? Select all that apply.",["Training","Supervision","Information","Instructions","A pay rise"],[0,1,2,3],"Training, supervision, information and instructions.");
+MS("law",2,"If you work unsafely while holding a HRWL, which actions can your safety regulator take? Select all that apply.",["Suspend your HRWL","Cancel your HRWL","Refuse to renew your HRWL","Upgrade your licence class"],[0,1,2],"The regulator can suspend, cancel or refuse to renew your HRWL.");
+MS("law",3,"Which of these people should you talk to about known hazards before starting work? Select all that apply.",["Supervisors","Co-workers","Managers","First aid officers","Fire wardens","Truck drivers","Customers browsing online"],[0,1,2,3,4,5],"Supervisors, co-workers, managers, first aid officers, fire wardens and truck drivers.");
+M("law",2,"In the guide's kitchen example, what is the HAZARD?",["The wet floor","Slipping over and hurting yourself","The person cleaning","The spilt water bottle"],"The wet floor is the hazard. The risk is that you may slip over and hurt yourself.");
+M("law",2,"In the guide's kitchen example, what is the RISK?",["You may slip over and hurt yourself","The wet floor","The kitchen","Cleaning products"],"The risk is what could happen to you when exposed to the hazard.");
+M("law",2,"What does HRWL stand for?",["High risk work licence","Heavy road work licence","Hazard risk worker log","High rated weight load"],"HRWL is a high risk work licence. A forklift is Class LF.");
+M("law",3,"Which licence class is a forklift in the guide?",["Class LF","Class LO","Class DG","Class CN"],"Forklift is Class LF.");
+M("law",3,"Why do co-workers, supervisors and others need to be made aware of hazards?",["To be aware of hazards and to identify hazards and controls","To decide who gets blamed","To change the roster","To reduce the speed limit"],"So everyone is aware of the hazards and can identify the hazards and the controls.");
+M("law",2,"According to your guide, the Queensland safety regulator is listed as",["Worksafe Qld","SafeWork NSW","WorkSafe Vic","WorkSafe WA"],"The guide lists 'Worksafe Qld'. In practice, the Queensland regulator is Workplace Health and Safety Queensland, which operates under the WorkSafe Queensland brand.");
+M("law",2,"True or false: A hazard and a risk mean the same thing.",["False. A hazard can cause harm, a risk is what could happen when you are exposed to it","True","True, but only on a worksite","False, but only for electrical hazards"],"Hazard: something that may cause harm or injury. Risk: what could happen to you when exposed to a hazard.");
+
+/* Hazards, power lines, surfaces (p4-6, p33) */
+MS("haz",4,"Which of these are common hazards in a forklift operating environment? Select all that apply.",["Power lines","Slopes or ramps","Blind corners","Damaged racking systems","Dangerous goods","A hard, flat, clear bitumen surface"],[0,1,2,3,4],"The guide lists power lines, people, other forklift traffic, poor lighting, poor ventilation, weather, uneven and wet surfaces, blind corners, obstructions, slopes or ramps, overhead light fixtures, damaged racking, truck traffic, loading docks, noise, hot or cold environments, surrounding structures and dangerous goods.");
+MS("haz",4,"Which of these make power lines more visible? Select all that apply.",["Tiger tails","Power line marker balls","Warning signs","Spring hinged gates","Painted foot symbols"],[0,1,2],"Tiger tails, power line marker balls and warning signs.");
+M("haz",4,"What colours are tiger tails?",["Black and yellow stripes","Red and white","Blue and orange","Green and yellow"],"Black and yellow stripes wrapped around a power line.");
+M("haz",4,"Why do power lines need extra visual indicators?",["Sun glare can make them harder to see clearly","They are underground","They only carry low voltage","Forklifts cannot reach them"],"Operating around power lines is very risky, especially with a lot of sun glare.");
+M("haz",5,"Why should Queensland exclusion distances be clarified with the electrical authority even when you appear to be outside the zones?",["The zones also depend on the operator's competency level","Queensland has no minimum distances","The forklift's data plate sets them","They only apply at night"],"The Queensland Electrical Safety Regulation breaks distances down by line size AND operator competency, so confirm with the electrical authority before work starts.");
+M("haz",5,"The Queensland Electrical Safety Regulation breaks exclusion zones down by",["The size of the power line and the competency level of the operator","The colour of the forklift","The time of day","The load weight"],"Line size and operator competency level.");
+OR("haz",6,"Put the 5 steps for contacting overhead power lines in order.",["Warn people to stay away","Try to break away from the power lines","Stay in the forklift if safe (if not, exit and jump or shuffle 8 m away with feet together)","Report to a supervisor","Check the forklift before reuse"],"The procedure must be followed IN ORDER.");
+M("haz",6,"After warning people to stay away, what is the next step after contacting overhead power lines?",["Try to break away from the power lines","Report to a supervisor","Jump out of the forklift","Check the forklift"],"Step 2 is to try to break away from the power lines.");
+M("haz",6,"If it is NOT safe to stay in the forklift after power line contact, you should",["Exit and jump or shuffle 8 m away with your feet together","Step off and walk away normally","Climb the power pole","Stay and wait for help"],"Exit the forklift and jump or shuffle 8 m away with feet together.");
+MS("haz",14,"Which of these are weather hazards listed in the guide? Select all that apply.",["Wet or slippery conditions","UV rays from the sun","Cold or strong winds","Fog limits visibility","Extreme cold temperatures","Calm, clear and mild days"],[0,1,2,3,4],"Wet or slippery conditions, UV rays, cold or strong winds, fog and extreme cold.");
+M("haz",14,"Fog is a hazard when operating because it",["Limits visibility","Warms the battery","Lowers the capacity","Locks the steering"],"Fog limits visibility.");
+MS("haz",8,"On wet or slippery surfaces, which precautions should you take? Select all that apply.",["Slow down","Brake slowly","Turn slowly","Avoid using ramps or slopes","Speed up to cross quickly"],[0,1,2,3],"Slow down, brake slowly, turn slowly and avoid ramps or slopes.");
+MS("haz",33,"Which surfaces should be avoided at all times? Select all that apply.",["Backfilled ground","Trench covers or grates","Railway tracks","Potholes","Soft soils","Hard flat bitumen","Flat concrete"],[0,1,2,3,4],"Most forklifts are designed for hard flat surfaces such as hard bitumen or flat concrete.");
+M("haz",33,"Most forklifts are designed for use on",["Hard flat surfaces such as hard bitumen or flat concrete","Soft sand","Sloping ground","Boggy ground"],"Hard flat surfaces. The guide's avoid list includes backfilled ground, cracked concrete, trench covers, soft soils, railway tracks, potholes, rough surfaces, hard compacted soil, cracked bitumen and slopes.");
+M("haz",33,"Which type of forklift is OK on rough uneven surfaces?",["Rough terrain trucks","High reach trucks","Electric indoor forklifts","Hand pallet trucks"],"Rough terrain trucks are okay on rough uneven surfaces.");
+OR("haz",14,"You find a fault such as an unreadable data plate. Put the steps in order.",["Remove the key","Tag the forklift 'out of service'","Report to a supervisor"],"Remove the key, tag out of service, report to a supervisor.");
+
+/* Site controls (p7, p33-35) */
+MS("site",7,"Which of these are control measures to keep pedestrians and other traffic safe? Select all that apply.",["Warning signs","Barriers","Walkways","Flashing lights","Traffic mirrors","Removing the horn"],[0,1,2,3,4],"Warning signs, barriers, walkways, flashing lights and traffic mirrors.");
+M("site",7,"The warning signs shown in the guide are what colour?",["Bright yellow","Pale blue","Plain black","Green"],"These signs are bright yellow.");
+MS("site",33,"Which of these are used to separate pedestrians from the forklift operating area? Select all that apply.",["Overhead walkways and vehicle routes","Designated walkways and parking areas","High impact barriers","Pedestrian crossings","Gates and bollards (guardrails)","Temporary barriers","Letting people walk down the aisles"],[0,1,2,3,4,5],"The guide lists overhead walkways, designated walkways, high impact barriers, pedestrian crossings, gates and bollards, temporary barriers, and flashing lights and signs.");
+M("site",35,"Temporary barriers are",["Bright yellow, quick to erect and easy to move around","Permanent concrete walls","Painted black","Welded to the floor"],"Simple but effective barriers that can be erected quickly and moved around if needed.");
+M("site",34,"The bollards in a gate and guardrail system are usually",["Bright yellow so they stand out clearly","Painted grey","Hidden below the floor","Made of timber"],"Bright yellow.");
+M("site",35,"In the guide's sign example, the speed limit sign says to keep to a speed limit of",["5 km/h","20 km/h","40 km/h","10 km/h"],"'Keep to a speed limit of 5km/h at all times.'");
+
+/* Weather and communications (p10-11) */
+MS("comm",11,"Which of these are ways to communicate in the workplace while operating a forklift? Select all that apply.",["Written communication and signage","Verbal communication","Hand signals","Warning devices","Two-way radio","Smoke signals"],[0,1,2,3,4],"Written, signage, verbal, hand signals, warning devices and two-way radio.");
+M("comm",11,"Why might you miss a co-worker's signal?",["The forklift can be noisy or you are concentrating on what you are doing","Signals are only for pedestrians","Forklifts have no mirrors","Signals are not used in workplaces"],"Co-workers need to communicate with you, but the forklift can be noisy or you may be concentrating.");
+M("comm",10,"Planning forklift tasks around the weather forecast helps you to",["Schedule the work tasks and plan for risk controls","Avoid checking the data plate","Lift heavier loads","Skip the pre-start"],"It helps to schedule the work tasks and plan for risk controls.");
+M("comm",11,"Communications that are 'safe and adequate' are one of the things you consider",["Before shifting loads, other than hazards","Only after the shift","Only for pedestrians","Only at night"],"Communications (safe and adequate) is on the planning list, along with permits and the equipment required for the task.");
+M("comm",7,"When operating at night or in dark areas, you must always have",["Adequate lighting","Fewer warning signs","A second operator","A louder horn"],"Adequate lighting.");
+
+/* Types, fuel and batteries (p8-11) */
+M("type",8,"Which type of forklift is used outdoors because of exhaust fumes?",["Internal combustion (LPG, diesel and petrol)","Electric","Hand pallet","Battery stacker"],"Internal combustion forklifts are not suitable with restricted air flow because fumes can kill you.");
+M("type",9,"Electric forklifts are best used",["Indoors in confined areas","On boggy ground","On railway tracks","On steep slopes"],"Electric forklifts are the most suitable in a confined area with limited air flow.");
+M("type",10,"A wet cell forklift battery contains",["An acid solution of sulphuric acid and water","Petrol","Diesel","Distilled water only"],"A wet cell battery has a sulphuric acid and water solution with positive (anode) and negative (cathode) terminals.");
+M("type",10,"The terminals of a wet cell battery are usually made of",["Lead and zinc plates","Steel and plastic","Copper and rubber","Glass and iron"],"Usually lead and zinc plates.");
+M("type",10,"What gas does a forklift battery give off while it is on charge?",["Flammable (explosive) gas","Oxygen","Nitrogen","Carbon dioxide"],"A flammable gas, which is extremely explosive. Your guide names it as hydrogen sulphide; a charging lead-acid battery actually gives off hydrogen. Use 'flammable gas' unless your assessor wants a name.");
+M("type",10,"Why should a battery be kept in a ventilated area while on charge?",["To release flammable gas and prevent explosions","To cool the operator","To stop the horn sounding","To speed up the charge"],"Ventilation lets the flammable, explosive gas escape.");
+MS("type",11,"If you refuel an engine that is still running, which of these could ignite? Select all that apply.",["The fuel","The vapours","The gases","The tyres"],[0,1,2],"Fuel, vapours and gases. Turn the engine off before refuelling.");
+M("type",9,"Rear wheel steering gives an operator the ability to",["Take tighter and sharper turns","Carry passengers","Lift higher","Travel faster"],"Tighter, sharper turns, but it creates rear end swing.");
+M("type",9,"To control rear end swing, keep",["The front wheel close to where you are turning","The load raised","The side shift to one side","The speed up"],"Keep the front wheel close to where you are turning.");
+
+/* Pre-start and operational checks (p13-15) */
+MS("pre",13,"Select ALL the items that are pre-start checks done before turning the forklift on.",["Log book and operator's manual","Tyres and wheels","Fluid levels","Forks","Mast","Battery","Data plate","Fork locking pins","Seat belt","Horn","Reverse beeper","Gauges"],[0,1,2,3,4,5,6,7,8],"Horn, reverse beeper and gauges are operational checks done with the ignition ON.");
+MS("pre",13,"Which of these are also pre-start checks? Select all that apply.",["Guards (overhead and load)","Attachments","Hydraulic hoses","Chains","Hydraulic rams","Pulleys","Structural damage","Mirrors","Carriage","Seat","Steering","Brakes"],[0,1,2,3,4,5,6,7,8,9],"Steering and brakes are operational checks done with the ignition ON.");
+MS("pre",15,"Select the operational checks done after you step in and turn the ignition ON.",["Steering","Brakes","Horn","Lights","Hydraulic levers","Gauges","Reverse beeper","Chains","Data plate","Mast"],[0,1,2,3,4,5,6],"Steering, brakes, horn, lights, hydraulic levers, gauges and reverse beeper.");
+MS("pre",13,"Which of these are tyre defects to look for? Select all that apply.",["Large pieces of rubber missing","Flat tyres","Unsecure wheels","Underinflated tyres","Uneven tyre tread","Tyres worn down","Matching pressure in all tyres"],[0,1,2,3,4,5],"Matching pressure is what you want. The rest are defects.");
+M("pre",15,"How many guards are all forklifts fitted with?",["Two (a load guard and an overhead guard)","One","Three","None"],"Load guard and overhead guard.");
+M("pre",14,"A pre-start fault is found. What is the FIRST of the three steps?",["Remove the key","Report to a supervisor","Tag the forklift out of service","Drive it to the workshop"],"Remove the key, tag 'out of service', report to a supervisor.");
+M("pre",13,"The pre-start includes checking the log book and",["The operator's or manufacturer's manual","The weather forecast only","The price of fuel","The pedestrian roster"],"Log book and operator's or manufacturer's manual.");
+M("pre",13,"Which of these is checked for a gas forklift in the pre-start?",["The LPG cylinder","The reverse beeper","The horn","The gauges"],"LPG cylinder (gas forklift).");
+
+/* Safe operation and stability (p11-23) */
+MS("ops",11,"Other than hazards, which of these should you consider before shifting a load? Select all that apply.",["Load weight","Safest route to the load","Location of the load","Type of forklift","Type of attachment","Capacity of the forklift","Communications","Permits required","Equipment required for the task","The colour of the pallet"],[0,1,2,3,4,5,6,7,8],"The guide lists these nine items. The pallet colour is not one of them.");
+MS("ops",16,"Which methods can be used to work out the weight of a load? Select all that apply.",["Checking weighbridge documents","Calculating the weight","Checking the load for labels","Weighing the load","Checking the inventory system","Guessing by eye"],[0,1,2,3,4],"Never guess.");
+MS("ops",16,"Your view is blocked by a tall load. What should you do? Select all that apply.",["Travel in reverse","Use a spotter","Repack the load if it is safe to do so","Raise the load higher to see underneath","Drive faster"],[0,1,2],"Travel in reverse, use a spotter, or repack the load if it is safe to do so.");
+MS("ops",18,"Which actions could tip the forklift over SIDEWAYS? Select all that apply.",["Turning too fast","Turning on ramps","Turning with a load raised","Driving on uneven surfaces","Driving with an uneven or unbalanced load","Carrying the load on one fork","Uneven tyres","Side shift not centred","Braking severely","Driving overloaded"],[0,1,2,3,4,5,6,7],"Braking severely and driving overloaded are forwards tip-over actions.");
+MS("ops",19,"Which actions could tip the forklift over FORWARDS? Select all that apply.",["Driving overloaded","Braking severely","Driving with the load too high","Driving too fast","Driving with the load facing forwards down a hill","Driving over an uneven surface","Driving with an unbalanced load","Too much forward tilt with the load raised","Load too far forward on the forks (not against heels)","Centralising the side shift","Keeping the load low and against the heels"],[0,1,2,3,4,5,6,7,8],"Centralising the side shift and keeping the load low against the heels are safe practices.");
+MS("ops",18,"What are the dangers of carrying a load on only one fork arm? Select all that apply.",["Tipping the load","Tipping the forklift","Damaging the forklift","Better stability"],[0,1,2],"Tipping the load, tipping the forklift and damaging the forklift.");
+MS("ops",18,"What could happen if you turn a loaded forklift on a ramp? Select all that apply.",["You could lose the load","You could tip the forklift","The tyres get extra grip","The load gets lighter"],[0,1],"It is unsafe because you could lose the load or tip the forklift.");
+OR("ops",21,"Put the three things to plan for when stacking loads in the guide's order.",["A flat level surface","Heaviest goods on the bottom","Keep the stack stable"],"Flat level surface, heaviest on the bottom, keep the stack stable.");
+M("ops",20,"The third hydraulic lever on most modern forklifts is the",["Side shift","Mast tilt","Fork lift","Parking brake"],"It makes the load guard shift left and right and is commonly called the side shift function.");
+M("ops",20,"The side shift function lets the operator",["Square up a load or butt it against an adjacent load","Raise the load higher","Brake faster","Steer with the rear wheels"],"Always centralise the side shift when carrying a load.");
+M("ops",22,"A jib attachment acts like a",["Crane","Clamp","Platform","Counterweight"],"A jib acts as a crane, which means more movement of the load.");
+M("ops",22,"On the guide's balance point diagram, the fulcrum is shown as a",["Triangle under the front tyres","Circle at the seat","Square at the counterweight","Line along the mast"],"A triangle under the front tyres touching the ground.");
+M("ops",16,"True or false: you can carry a passenger on any forklift if they hold on tightly.",["False. Only when the forklift is designed to carry them","True","True, for short distances","True, if they wear a hard hat"],"Only a rare 2-seater forklift, such as some sea container forklifts, may carry people.");
+M("ops",17,"True or false: it is safe to lower a load over people if you go slowly.",["False. It creates a risk of injury or death if the load falls","True","True, if they wear hard hats","True, if the load is light"],"Never raise or lower a load over people.");
+M("ops",23,"A catastrophic failure of the brakes, steering or hydraulics. How many things should you do?",["Two: stop and tag out of service, then report to a supervisor","One: keep working","Three: fix it, test it, carry on","None"],"Stop the forklift and tag 'out of service', then report to a supervisor.");
+MS("ops",23,"Select the TWO actions for a catastrophic failure of brakes, steering or hydraulics.",["Stop the forklift and tag it 'out of service'","Report to a supervisor","Finish the load first","Fix it yourself"],[0,1],"Stop and tag out of service, then report to a supervisor.");
+M("ops",23,"You need to drive into a sea container from a loading dock. Before shifting a load across the gap you must place",["Dock plates or bridge plates","A wooden pallet","A traffic cone","Nothing if you go slowly"],"Dock plates or bridge plates across the gap between the truck and the dock.");
+
+/* Attachments (p19-20, p30) */
+M("att",19,"Fork extensions are also called",["Slippers","Spikes","Rotators","Clamps"],"Fork extensions (slippers) pick up two loads at once or a longer load.");
+M("att",19,"Which attachment picks up 200 L drums?",["Drum clamp","Bale clamp","Jib","Carpet spike"],"Drum clamp.");
+M("att",19,"Which attachment is used for crushed stacks of recycled cans?",["Bale clamp","Paper roll clamp","Jib","Rotator"],"Bale clamps pick up crushed stacks of recycled cans or bales of hay.");
+M("att",19,"Which attachment can be used to clamp tyres?",["Paper roll clamp","Drum clamp","Carpet spike","Jib"],"The paper roll clamp is used for large rolls of paper or tyres.");
+M("att",20,"Which attachment rotates a bin of grapes into a wine hopper?",["Rotator","Jib","Drum clamp","Personnel work platform"],"Rotators rotate loads.");
+M("att",20,"Which attachment lifts people to count stock?",["Personnel work platform","Bale clamp","Carpet spike","Jib"],"Personnel work platforms elevate people to perform maintenance or count stock.");
+M("att",20,"Which attachment swings engine blocks or gearboxes?",["Jib","Carpet spike","Drum clamp","Fork extensions"],"A jib swings odd shaped loads.");
+MS("att",19,"Which of these attachments are listed in the guide? Select all that apply.",["Drum clamp","Paper roll clamp","Bale clamp","Fork extensions","Jib","Carpet spikes","Personnel work platforms","Rotators","Cattle prod"],[0,1,2,3,4,5,6,7],"The guide lists these eight attachments.");
+M("att",14,"Why does a very long carpet spike greatly lower the capacity?",["It gives a greater load centre distance","It makes the mast shorter","It fits poorly on pallets","It makes tyres softer"],"A longer attachment means a greater load centre distance, which lowers capacity.");
+M("att",20,"The effect of an attachment on the forklift's lifting capacity is",["Reduced","Increased","None","Doubled"],"Attachments reduce the capacity.");
+
+/* Data plates and load centres (p23-26, p30-31) */
+M("plate",23,"Dim B is calculated by dividing which measurement by 2?",["Length","Height","Weight","Tyre width"],"Dim B (horizontal load centre) = length ÷ 2.");
+M("plate",23,"Dim C is calculated by dividing which measurement by 2?",["Height","Length","Weight","Mast width"],"Dim C (vertical load centre) = height ÷ 2.");
+M("plate",30,"The three columns in each section of the guide's sample data plate are",["Fork height, load centre and rated capacity","Speed, weight and tyre size","Serial no, model and fuel type","Battery, LPG and mast"],"Fork height (overall lift height), load centre (heel of forks to the load's centre) and rated capacity (overall weight that can be lifted safely).");
+M("plate",30,"The sample data plate is split into two sections",["Mast vertical and mast forward tilt 5 degrees","Front axle and rear axle","Indoor and outdoor","Day and night"],"The capacity changes with a forward tilt mast compared with a vertical mast.");
+M("plate",30,"Compared with a vertical mast, the sample plate capacity with the mast tilted forward 5 degrees is",["Lower","Higher","The same","Not listed"],"Forks and side shift: 2500 kg vertical, 2050 kg at 5 degrees forward tilt.");
+M("plate",30,"On a data plate, 'rated capacity' means",["The overall weight that can be lifted safely","The weight of the empty forklift","The maximum travel speed","The fuel tank size"],"Overall weight that can be lifted safely.");
+M("plate",30,"On a data plate, 'fork height' is",["The overall lift height","The length of the forks","The width of the load","The mast tilt angle"],"Fork height means overall lift height.");
+M("plate",30,"You are unsure how to read a forklift's data plate. You should",["Ask your supervisor","Guess based on the last forklift you used","Ignore it","Use another forklift's plate"],"Manufacturers lay plates out differently, so always ask your supervisor if you are unsure.");
+M("plate",31,"To work out whether a forklift can lift a load you look at",["The load weight in kg AND the load centres in mm","The weight only","The load centre only","The pallet colour"],"Both must be within the forklift's rating.");
+M("plate",31,"True or false: if the load weighs less than the rated capacity, it can always be lifted.",["False. The load centres must also be within the rating","True","True, if the mast is vertical","True, for small loads"],"You must check TWO things: the load weight and the load centres.");
+N("plate",30,"Sample data plate: what is the max forward tilt?",5,"degrees","The plate shows max fwd tilt of 5 degrees.");
+N("plate",30,"Sample data plate: what is the max height?",4200,"mm","The plate shows a max height of 4200 mm.");
+N("plate",30,"Sample plate: carpet spike, mast tilted forward 5 degrees, 4200 mm fork height. What is the rated capacity?",750,"kg","The forward tilt carpet spike row reads 4200 / 1400 / 750 kg.");
+N("plate","Practice question using the plate on page 30","Sample plate: how many kg less can the forks and side shift lift with the mast tilted forward compared with vertical (600 mm load centre)?",450,"kg","2500 - 2050 = 450 kg.");
+N("plate",25,"The guide's data plate example is rated at 2250 kg to a lift height of 3500 mm. What is the lift height?",3500,"mm","Rated at 2250 kg to a lift height of 3500 mm with a load centre distance of 600 mm (or less).");
+N("plate",25,"Same plate (page 25): what is the rated capacity?",2250,"kg","2250 kg.");
+N("plate",31,"The page 31 forklift is rated at 9000 kg with 1200 mm load centres. What is its lift height?",9910,"mm","9000 kg at a lift height of 9910 mm.");
+M("plate",26,"A load that is not against the heel of the forks means the forklift will be affected in which ways?",["A lower capacity, OR the forklift could tip over","A higher capacity","Faster travel","Less rear end swing"],"Keep the load against the heels of the forks.");
+
+/* Calculations (p23-24, p27-29, p32) */
+N("calc","Practice question using the method on page 27","Cement: 6 bags per layer, 7 layers, 20 kg per bag, pallet 25 kg. What is the total weight?",865,"kg","6 x 7 = 42 bags. 42 x 20 = 840 kg. 840 + 25 = 865 kg.");
+N("calc","Practice question using the method on page 27","Boxes: 12 boxes per layer, 5 layers, 8 kg per box, pallet 22 kg. What is the total weight?",502,"kg","12 x 5 = 60 boxes. 60 x 8 = 480 kg. 480 + 22 = 502 kg.");
+N("calc","Practice question using the method on page 27","Boxes: 9 boxes per layer, 3 layers, 12 kg per box, pallet 40 kg. What is the total weight?",364,"kg","9 x 3 = 27 boxes. 27 x 12 = 324 kg. 324 + 40 = 364 kg.");
+N("calc","Practice question using the method on page 28","Drums: 4 drums at 200 kg each on a 30 kg pallet. What is the total weight?",830,"kg","4 x 200 = 800 kg. 800 + 30 = 830 kg.");
+N("calc","Practice question using the method on page 28","Drums: 5 drums at 180 kg each on a 45 kg pallet. What is the total weight?",945,"kg","5 x 180 = 900 kg. 900 + 45 = 945 kg.");
+N("calc","Practice question using the method on page 32","A shipping container has a tare weight of 3800 kg and 9500 kg of contents. What is the total weight?",13300,"kg","3800 + 9500 = 13300 kg.");
+N("calc","Practice question using the method on page 32","A container's tare weight is 4500 kg and the load inside is 11000 kg. What is the total weight?",15500,"kg","4500 + 11000 = 15500 kg.");
+N("calc",28,"A load is 1600 mm long. What is the load centre distance?",800,"mm","1600 ÷ 2 = 800 mm.");
+N("calc",24,"A load is 1200 mm long. What is the horizontal load centre (Dim B)?",600,"mm","1200 ÷ 2 = 600 mm.");
+N("calc","Practice question using the method on page 28","A load is 1800 mm long. What is the load centre distance?",900,"mm","1800 ÷ 2 = 900 mm.");
+N("calc","Practice question using the method on page 28","A load is 2000 mm long. What is the load centre distance?",1000,"mm","2000 ÷ 2 = 1000 mm.");
+N("calc",24,"A load is 1100 mm high. What is the vertical load centre (Dim C)?",550,"mm","1100 ÷ 2 = 550 mm.");
+N("calc",32,"The guide's pallet is 1400 mm high. What is the vertical load centre (Dim C)?",700,"mm","1400 ÷ 2 = 700 mm, which is less than Dim C of 1200 mm.");
+N("calc",32,"A container is 2.5 m wide. What is the horizontal load centre in mm?",1250,"mm","2500 ÷ 2 = 1250 mm, which is over Dim B of 1200 mm.");
+N("calc",32,"A container is 2.6 m high. What is the vertical load centre in mm?",1300,"mm","2600 ÷ 2 = 1300 mm, which is over Dim C of 1200 mm.");
+M("calc","Practice question using the method on page 28","A forklift is rated at 4200 kg at a 600 mm load centre. Your load weighs 4000 kg and is 1300 mm long. Can it be lifted safely?",["No. The load centre of 650 mm is over 600 mm","Yes. The weight is under 4200 kg","Yes. The load centre is under 600 mm","No. The weight is over 4200 kg"],"1300 ÷ 2 = 650 mm, which is over the 600 mm rating, even though the weight is under 4200 kg.");
+M("calc","Practice question using the method on page 28","A forklift is rated at 2500 kg at a 600 mm load centre. Your load weighs 2400 kg and is 1100 mm long. Can it be lifted safely?",["Yes. 2400 kg is under 2500 kg and the load centre is 550 mm","No. The load centre is over 600 mm","No. The weight is over the rating","Only with an attachment"],"1100 ÷ 2 = 550 mm, within 600 mm, and the weight is under 2500 kg.");
+M("calc",32,"The guide says to work out a loaded container's weight, you start with",["A calculation: tare weight plus contents","The pallet weight","The data plate","The load centre"],"You do not know the total weight of the loaded container yet, so start with a calculation.");
+M("calc",27,"When working out a pallet's weight, what is the correct order?",["Total items, then total item weight, then add the pallet","Add the pallet first, then multiply","Guess, then check","Weigh the empty forklift"],"Work out the total items first, the total item weight next, and the grand total weight last.");
+
+/* Shut down and parking (p26-27) */
+OR("park",27,"Put the parking steps in the guide's order.",["Tilt forks forward and lower to the ground","Hand brake on","Neutral gear","Remove the keys","Turn off the LPG cylinder","Place battery on charge"],"Tilt forks forward and lower, hand brake on, neutral gear, remove the keys, turn off the LPG cylinder, place battery on charge.");
+MS("park",26,"Which are places a forklift should NOT be parked? Select all that apply.",["Near first aid stations","Near emergency exits","Near fire extinguishers","On ramps","On walkways","In a designated parking area"],[0,1,2,3,4],"Do not park near first aid, exits or extinguishers, or on ramps or walkways.");
+M("park",27,"Which parking step applies to a gas forklift?",["Turn off the LPG cylinder","Place the battery on charge","Raise the forks to axle height","Leave the engine idling"],"Turn off the LPG cylinder. An electric forklift's battery goes on charge.");
+M("park",27,"Which parking step applies to an electric forklift?",["Place the battery on charge","Turn off the LPG cylinder","Refuel the tank","Check the exhaust"],"Place battery on charge, in a ventilated area.");
+M("park",27,"When you park up for the day, you remove the key to",["Prevent unauthorised use","Reset the gauges","Lock the forks","Save fuel"],"To prevent unauthorised use.");
+
+/* Other states, reference only (p2, p5-6) */
+M("oth",2,"Which regulator does the guide list for New South Wales?",["SafeWork NSW","WorkSafe Vic","Worksafe Qld","Worksafe WA"],"NSW is SafeWork NSW.");
+M("oth",2,"Which regulator does the guide list for Victoria?",["WorkSafe Vic","SafeWork NSW","Worksafe Qld","Worksafe WA"],"Victoria is WorkSafe Vic.");
+M("oth",5,"NSW, non-accredited: minimum distance from lines above 330 kV?",["8.0 m","3.0 m","6.0 m","10 m"],"Above 330 kV is 8.0 m. Up to 132 kV is 3.0 m, and above 132 kV up to 330 kV is 6.0 m.");
+M("oth",5,"Victoria: distribution lines (power poles) up to and including 66 kV, minimum distance?",["6.4 m (or 3.0 m with a qualified spotter)","3.0 m","8.0 m","10 m"],"6.4 m, or 3.0 m with a qualified spotter.");
+M("oth",5,"Victoria: transmission lines (towers) greater than 66 kV, minimum distance?",["10 m (or 8 m with a qualified spotter)","6.4 m","3.0 m","1.0 m"],"10 m, or 8 m with a qualified spotter.");
+M("oth",6,"Western Australia: minimum distance for live insulated power lines of 1000 V or less?",["0.5 m","1.0 m","3.0 m","6.0 m"],"0.5 m. Uninsulated 1000 V or less is 1.0 m.");
+M("oth",6,"Western Australia: minimum distance for live power lines between 1000 V and 33000 V?",["3.0 m","0.5 m","1.0 m","6.0 m"],"3.0 m (insulated or not). Above 33000 V is 6.0 m.");
+M("oth",6,"Western Australia falls under which regulation code for working near power lines?",["Regulation Code 3.64","Regulation Code 1.00","Regulation Code 5.12","Regulation Code 7.25"],"Regulation Code 3.64.");
+
+/* ---------- app ---------- */
+var app=document.getElementById("app");
+var S={sel:{},len:20,instant:true,list:[],i:0,ans:[],locked:false,picked:-1,msel:{},seq:[],numval:""};
+Object.keys(TOPICS).forEach(function(k){S.sel[k]=(k!=="oth");});
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function pool(){return D.filter(function(q){return S.sel[q.t];});}
+function count(t){return D.filter(function(q){return q.t===t;}).length;}
+function refText(q){return typeof q.p==="number"?"Study guide page "+q.p:q.p;}
+function parseNum(s){var t=String(s).replace(/[^0-9.\-]/g,"");if(t===""||t==="-"||t===".")return NaN;return Number(t);}
+function answerText(q){
+  if(q.s){return q.opts.filter(function(o){return o.c;}).map(function(o){return o.t;}).join("; ");}
+  if(q.opts){return q.opts.filter(function(o){return o.c;})[0].t;}
+  if(q.ord){return q.ord.map(function(t,i){return (i+1)+". "+t;}).join("  ");}
+  return q.a.toLocaleString("en-AU")+" "+q.u;
+}
+
+function renderStart(){
+  var avail=pool().length;
+  var topics=Object.keys(TOPICS).map(function(k){
+    return '<label class="chk"><input type="checkbox" data-act="topic" data-k="'+k+'"'+(S.sel[k]?' checked':'')+'><span>'+esc(TOPICS[k])+'<small>'+count(k)+'</small></span></label>';
+  }).join("");
+  var lens=[20,40,0].map(function(n){
+    var label=n===0?"All":String(n);
+    return '<button type="button" class="seg" data-act="len" data-n="'+n+'" aria-pressed="'+(S.len===n)+'">'+label+'</button>';
+  }).join("");
+  var n=S.len===0?avail:Math.min(S.len,avail);
+  app.innerHTML=
+   '<section class="card stack" aria-label="Test setup">'+
+   '<div class="row"><button type="button" class="btn" data-act="mock">Mock exam (64)</button><span class="hint">Same size as the official test: 64 mixed Queensland questions, answers revealed at the end. Pass mark is 58 correct (90%).</span></div>'+
+   '</section>'+
+   '<section class="card stack" aria-label="Custom test">'+
+   '<h2>Custom test</h2>'+
+   '<fieldset><legend>Topics</legend><div class="topics">'+topics+'</div></fieldset>'+
+   '<fieldset><legend>Number of questions</legend><div class="lens">'+lens+'</div></fieldset>'+
+   '<label class="chk"><input type="checkbox" id="instant" data-act="instant"'+(S.instant?' checked':'')+'><span>Show the answer after each question<br><span class="hint">Turn off for exam mode: answers are revealed at the end.</span></span></label>'+
+   '<div class="row"><button type="button" class="btn" data-act="start"'+(avail?'':' disabled')+'>Start test ('+n+')</button><span class="hint">'+avail+' questions in the selected topics. Some questions ask you to select all that apply, put steps in order, or type a calculation answer.</span></div>'+
+   '</section>';
+}
+
+function startTest(list){
+  var chosen=list||shuffle(pool()).slice(0,S.len===0?undefined:S.len);
+  S.list=chosen.map(function(q){
+    var c=Object.assign({},q);
+    if(q.o){c.opts=shuffle(q.o.map(function(t,i){return {t:t,c:i===0};}));}
+    if(q.s){c.opts=shuffle(q.s.map(function(t,i){return {t:t,c:q.k.indexOf(i)>-1};}));}
+    if(q.ord){c.bank=shuffle(q.ord.map(function(t,i){return {t:t,i:i};}));}
+    return c;
+  });
+  S.i=0;S.ans=[];renderQ();
+}
+
+function bodyHtml(q){
+  var h="";
+  if(q.ord){
+    h+='<p class="hint qhint">Tap the steps in the correct order.</p>';
+    h+='<ol class="seq">'+S.seq.map(function(bi,j){
+      var st=S.locked?(q.bank[bi].i===j?' ok':' no'):'';
+      return '<li class="'+st.trim()+'"><span>'+esc(q.bank[bi].t)+'</span></li>';
+    }).join("")+'</ol>';
+    if(!S.locked){
+      h+='<div class="opts">'+q.bank.map(function(b,k){
+        var used=S.seq.indexOf(k)>-1;
+        return '<button type="button" class="opt'+(used?' used':'')+'" data-act="place" data-k="'+k+'"'+(used?' disabled':'')+'><span class="ltr">+</span><span>'+esc(b.t)+'</span></button>';
+      }).join("")+'</div>';
+      h+='<div class="numrow"><button type="button" class="btn ghost" data-act="undo">Undo</button>'+(S.instant?'<button type="button" class="btn" data-act="checko">Check order</button>':'')+'</div>';
+    }
+    return h;
+  }
+  if(q.s){
+    h+='<p class="hint qhint">Select all that apply.</p><div class="opts">'+q.opts.map(function(o,k){
+      var sel=!!S.msel[k],cls='opt'+(sel?' sel':'');
+      if(S.locked){if(o.c){cls+=' ok';}else if(sel){cls+=' no';}}
+      return '<button type="button" class="'+cls+'" data-act="tog" data-k="'+k+'" aria-pressed="'+sel+'"'+(S.locked?' disabled':'')+'><span class="ltr">'+(sel?'✓':'')+'</span><span>'+esc(o.t)+'</span></button>';
+    }).join("")+'</div>';
+    if(!S.locked&&S.instant){h+='<div class="numrow"><button type="button" class="btn" data-act="checkm">Check</button></div>';}
+    return h;
+  }
+  if(q.opts){
+    return '<div class="opts" role="group" aria-label="Answer choices">'+q.opts.map(function(o,k){
+      var cls='opt';
+      if(S.locked){if(o.c){cls+=' ok';}else if(k===S.picked){cls+=' no';}}
+      else if(k===S.picked){cls+=' sel';}
+      return '<button type="button" class="'+cls+'" data-act="pick" data-k="'+k+'"'+(S.locked?' disabled':'')+'><span class="ltr">'+"ABCD".charAt(k)+'</span><span>'+esc(o.t)+'</span></button>';
+    }).join("")+'</div>';
+  }
+  return '<div class="numrow"><label class="sr" for="num">Your answer in '+esc(q.u)+'</label><input id="num" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="'+esc(S.numval)+'"'+(S.locked?' disabled':'')+'><span class="unit">'+esc(q.u)+'</span>'+((S.instant&&!S.locked)?'<button type="button" class="btn" data-act="check">Check</button>':'')+'</div>';
+}
+
+function renderQ(){
+  var q=S.list[S.i],total=S.list.length;
+  S.locked=false;S.picked=-1;S.msel={};S.seq=[];S.numval="";
+  var last=S.i===total-1;
+  app.innerHTML=
+   '<section class="card" aria-label="Question '+(S.i+1)+' of '+total+'">'+
+   '<div class="meta"><span>Question '+(S.i+1)+' of '+total+'</span><span>'+esc(TOPICS[q.t])+'</span></div>'+
+   '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+S.i+'"><i style="width:'+Math.round(S.i/total*100)+'%"></i></div>'+
+   '<h2 class="qtext" id="qtext" tabindex="-1">'+esc(q.q)+'</h2>'+
+   '<div id="qbody">'+bodyHtml(q)+'</div>'+
+   '<div id="fb" aria-live="polite"></div>'+
+   '<div class="nextrow"><button type="button" class="btn ghost" data-act="quit">End test</button>'+
+   '<button type="button" class="btn" id="nextbtn" data-act="next"'+(S.instant?' hidden':'')+'>'+(last?'See results':'Next')+'</button></div>'+
+   '</section>';
+  var h=document.getElementById("qtext");if(h){h.focus({preventScroll:true});}
+  window.scrollTo({top:0});
+}
+
+function redrawBody(){document.getElementById("qbody").innerHTML=bodyHtml(S.list[S.i]);}
+
+function grade(q){
+  if(q.ord){
+    var ok=S.seq.length===q.bank.length&&S.seq.every(function(bi,j){return q.bank[bi].i===j;});
+    return {ok:ok,given:S.seq.length?S.seq.map(function(bi){return q.bank[bi].t;}).join(" → "):null};
+  }
+  if(q.s){
+    var sel=[];q.opts.forEach(function(o,k){if(S.msel[k]){sel.push(o.t);}});
+    var ok2=q.opts.every(function(o,k){return !!S.msel[k]===o.c;});
+    return {ok:ok2,given:sel.length?sel.join("; "):null};
+  }
+  if(q.opts){
+    if(S.picked<0){return {ok:false,given:null};}
+    return {ok:q.opts[S.picked].c,given:q.opts[S.picked].t};
+  }
+  var v=parseNum(S.numval);
+  return isNaN(v)?{ok:false,given:null}:{ok:v===q.a,given:S.numval+" "+q.u};
+}
+
+function showFeedback(q,ok){
+  var fb=document.getElementById("fb");
+  fb.innerHTML='<div class="fb '+(ok?'ok':'no')+'"><strong>'+(ok?'Correct':'Not quite')+'</strong>'+
+    (ok?'':'<p>Correct answer: <b>'+esc(answerText(q))+'</b></p>')+
+    '<p>'+esc(q.e)+'</p><div class="ref">'+refText(q)+'</div></div>';
+  var nb=document.getElementById("nextbtn");if(nb){nb.hidden=false;nb.focus();}
+}
+
+function reveal(){
+  var q=S.list[S.i];
+  if(S.locked){return;}
+  if(!q.opts&&!q.ord){var inp=document.getElementById("num");S.numval=inp?inp.value:"";if(isNaN(parseNum(S.numval))){if(inp){inp.focus();}return;}}
+  if(q.ord&&S.seq.length<q.bank.length){return;}
+  var g=grade(q);
+  S.locked=true;S.ans[S.i]=g;
+  redrawBody();
+  showFeedback(q,g.ok);
+}
+
+function next(){
+  var q=S.list[S.i];
+  if(!S.locked){
+    if(!q.opts&&!q.ord){var inp=document.getElementById("num");S.numval=inp?inp.value:"";}
+    S.ans[S.i]=grade(q);
+  }
+  if(S.i<S.list.length-1){S.i++;renderQ();}else{renderResults();}
+}
+
+function renderResults(){
+  var total=S.list.length,done=0,right=0,by={};
+  S.list.forEach(function(q,i){
+    var a=S.ans[i];
+    if(!by[q.t]){by[q.t]={n:0,r:0};}
+    by[q.t].n++;
+    if(a){done++;}
+    if(a&&a.ok){right++;by[q.t].r++;}
+  });
+  var pct=total?Math.round(right/total*100):0;
+  var need=Math.ceil(total*9/10),pass=right>=need;
+  var rows=Object.keys(by).map(function(t){
+    var p=Math.round(by[t].r/by[t].n*100);
+    return '<tr><td>'+esc(TOPICS[t])+'</td><td><div class="mini" aria-hidden="true"><i class="'+(p<90?'lo':'')+'" style="width:'+p+'%"></i></div></td><td class="n">'+by[t].r+' / '+by[t].n+'</td></tr>';
+  }).join("");
+  var missed=[];
+  S.list.forEach(function(q,i){var a=S.ans[i];if(!a||!a.ok){missed.push(i);}});
+  var missHtml=missed.map(function(i){
+    var q=S.list[i],a=S.ans[i];
+    return '<div class="miss"><h3>'+esc(q.q)+'</h3>'+
+      '<p class="a"><b>You</b><span class="bad">'+(a&&a.given?esc(a.given):'No answer')+'</span></p>'+
+      '<p class="a"><b>Answer</b><span class="goodc">'+esc(answerText(q))+'</span></p>'+
+      '<p class="a">'+esc(q.e)+'</p><div class="ref">'+refText(q)+'</div></div>';
+  }).join("");
+  app.innerHTML=
+   '<section class="plate" aria-label="Results">'+
+   '<span class="bolt a"></span><span class="bolt b"></span><span class="bolt c"></span><span class="bolt d"></span>'+
+   '<div class="cap">Test result · '+done+' of '+total+' answered</div>'+
+   '<div class="score"><b>'+right+'</b><span>/ '+total+' correct · '+pct+'%</span></div>'+
+   '<p class="verdict '+(pass?'pass':'fail')+'">'+(pass?'Pass':'Not yet')+' · pass mark '+need+' / '+total+' (90%)</p>'+
+   '<div class="tblwrap"><table class="tbl"><thead><tr><th>Topic</th><th>Score</th><th>Correct</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="row" style="margin-top:18px">'+
+   (missed.length?'<button type="button" class="btn" data-act="retry">Retry missed ('+missed.length+')</button>':'')+
+   '<button type="button" class="btn ghost" data-act="again">New test</button></div>'+
+   '</section>'+
+   (missed.length?'<section class="card" aria-label="Questions to review"><h2>Review ('+missed.length+')</h2>'+missHtml+'</section>':'<section class="card"><h2>Every question right</h2><p class="lede">Run another test with all topics selected to keep the answers fresh.</p></section>');
+  window.scrollTo({top:0});
+}
+
+app.addEventListener("click",function(e){
+  var el=e.target.closest("[data-act]");if(!el){return;}
+  var a=el.getAttribute("data-act"),q=S.list[S.i];
+  if(a==="len"){S.len=Number(el.getAttribute("data-n"));renderStart();}
+  else if(a==="start"){startTest();}
+  else if(a==="mock"){
+    Object.keys(TOPICS).forEach(function(k){S.sel[k]=(k!=="oth");});
+    S.len=64;S.instant=false;startTest();
+  }
+  else if(a==="pick"){
+    if(S.locked){return;}
+    S.picked=Number(el.getAttribute("data-k"));
+    if(S.instant){reveal();}else{redrawBody();}
+  }
+  else if(a==="tog"){
+    if(S.locked){return;}
+    var k=Number(el.getAttribute("data-k"));
+    S.msel[k]=!S.msel[k];
+    el.classList.toggle("sel",S.msel[k]);
+    el.setAttribute("aria-pressed",S.msel[k]?"true":"false");
+    el.firstChild.textContent=S.msel[k]?"✓":"";
+  }
+  else if(a==="place"){if(!S.locked){S.seq.push(Number(el.getAttribute("data-k")));redrawBody();}}
+  else if(a==="undo"){if(!S.locked){S.seq.pop();redrawBody();}}
+  else if(a==="check"||a==="checkm"||a==="checko"){reveal();}
+  else if(a==="next"){next();}
+  else if(a==="quit"){renderResults();}
+  else if(a==="again"){renderStart();}
+  else if(a==="retry"){
+    var m=S.list.filter(function(qq,i){return !S.ans[i]||!S.ans[i].ok;});
+    startTest(shuffle(m));
+  }
+});
+app.addEventListener("change",function(e){
+  var el=e.target.closest("[data-act]");if(!el){return;}
+  var a=el.getAttribute("data-act");
+  if(a==="topic"){
+    var key=el.getAttribute("data-k");
+    S.sel[key]=el.checked;renderStart();
+    var again=app.querySelector('[data-k="'+key+'"]');if(again){again.focus();}
+  }
+  else if(a==="instant"){S.instant=el.checked;}
+});
+app.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&e.target&&e.target.id==="num"){
+    e.preventDefault();
+    if(S.instant){if(!S.locked){reveal();}else{next();}}else{next();}
+  }
+});
+
+renderStart();
+})();
+</script>
+
+</body></html>
